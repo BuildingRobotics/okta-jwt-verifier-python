@@ -34,7 +34,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     install_requires=[
-        "acachecontrol",
+        "cachecontrol",
         "aiohttp",
         "python-jose",
         "retry"
