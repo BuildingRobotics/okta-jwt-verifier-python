@@ -71,7 +71,7 @@ class JWTVerifier():
         """
         return JWTUtils.parse_token(token)
 
-    async def verify_access_token(self, token, claims_to_verify=('iss', 'aud', 'exp')):
+    def verify_access_token(self, token, claims_to_verify=('iss', 'aud', 'exp')):
         """Verify acess token.
 
         Algorithm:
@@ -93,7 +93,7 @@ class JWTVerifier():
             if headers.get('alg') != 'RS256':
                 raise JWTValidationException('Header claim "alg" is invalid.')
 
-            okta_jwk = await self.get_jwk(headers['kid'])
+            okta_jwk = self.get_jwk(headers['kid'])
             self.verify_signature(token, okta_jwk)
 
             self.verify_claims(claims,
@@ -104,7 +104,7 @@ class JWTVerifier():
         except Exception as err:
             raise JWTValidationException(str(err))
 
-    async def verify_id_token(self, token, claims_to_verify=('iss', 'exp'), nonce=None):
+    def verify_id_token(self, token, claims_to_verify=('iss', 'exp'), nonce=None):
         """Verify id token.
 
         Algorithm:
@@ -129,7 +129,7 @@ class JWTVerifier():
             if headers.get('alg') != 'RS256':
                 raise JWTValidationException('Header claim "alg" is invalid.')
 
-            okta_jwk = await self.get_jwk(headers['kid'])
+            okta_jwk = self.get_jwk(headers['kid'])
             self.verify_signature(token, okta_jwk)
 
             self.verify_claims(claims,
@@ -186,7 +186,7 @@ class JWTVerifier():
                 okta_jwk = key
         return okta_jwk
 
-    async def get_jwk(self, kid):
+    def get_jwk(self, kid):
         """Get JWK by kid.
 
         If key not found, clear cache and retry again to support keys rollover.
@@ -195,19 +195,19 @@ class JWTVerifier():
             str - represents JWK
         Raise JWKException if key not found after retry.
         """
-        jwks = await self.get_jwks()
+        jwks = self.get_jwks()
         okta_jwk = self._get_jwk_by_kid(jwks, kid)
 
         if not okta_jwk:
             # retry logic
             self._clear_requests_cache()
-            jwks = await self.get_jwks()
+            jwks = self.get_jwks()
             okta_jwk = self._get_jwk_by_kid(jwks, kid)
         if not okta_jwk:
             raise JWKException('No matching JWK.')
         return okta_jwk
 
-    async def get_jwks(self):
+    def get_jwks(self):
         """Get jwks_uri from claims and download jwks.
 
         version from okta_jwt_verifier.__init__.py
@@ -215,7 +215,7 @@ class JWTVerifier():
         jwks_uri = self._construct_jwks_uri()
         headers = {'User-Agent': f'okta-jwt-verifier-python/{version}',
                    'Content-Type': 'application/json'}
-        jwks = await self.request_executor.get(jwks_uri, headers=headers)
+        jwks = self.request_executor.get(jwks_uri, headers=headers)
         if not self.cache_jwks:
             self._clear_requests_cache()
         return jwks
@@ -274,8 +274,8 @@ class AccessTokenVerifier():
                                          cache_jwks,
                                          proxy)
 
-    async def verify(self, token, claims_to_verify=('iss', 'aud', 'exp')):
-        await self._jwt_verifier.verify_access_token(token, claims_to_verify)
+    def verify(self, token, claims_to_verify=('iss', 'aud', 'exp')):
+        self._jwt_verifier.verify_access_token(token, claims_to_verify)
 
 
 class IDTokenVerifier():
@@ -313,5 +313,5 @@ class IDTokenVerifier():
                                          cache_jwks,
                                          proxy)
 
-    async def verify(self, token, claims_to_verify=('iss', 'exp'), nonce=None):
-        await self._jwt_verifier.verify_id_token(token, claims_to_verify, nonce)
+    def verify(self, token, claims_to_verify=('iss', 'exp'), nonce=None):
+        self._jwt_verifier.verify_id_token(token, claims_to_verify, nonce)

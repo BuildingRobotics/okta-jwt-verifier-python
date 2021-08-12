@@ -55,9 +55,9 @@ import asyncio
 from okta_jwt_verifier import JWTVerifier
 
 
-async def main():
+def main():
     jwt_verifier = JWTVerifier(issuer='{ISSUER}', audience='api://default')
-    await jwt_verifier.verify_access_token('{JWT}')
+    jwt_verifier.verify_access_token('{JWT}')
     print('Token validated successfully.')
 
 
@@ -76,9 +76,9 @@ import asyncio
 from okta_jwt_verifier import JWTVerifier
 
 
-async def main():
+def main():
     jwt_verifier = JWTVerifier(issuer='{ISSUER}', client_id='{CLIENT_ID}', audience='api://default')
-    await jwt_verifier.verify_id_token('{JWT}', nonce='{NONCE}')
+    jwt_verifier.verify_id_token('{JWT}', nonce='{NONCE}')
     print('Token validated successfully.')
 
 
@@ -94,9 +94,9 @@ import asyncio
 from okta_jwt_verifier import IDTokenVerifier
 
 
-async def main():
+def main():
     jwt_verifier = IDTokenVerifier(issuer='{ISSUER}', client_id='{CLIENT_ID}', audience='api://default')
-    await jwt_verifier.verify('{JWT}', nonce='{NONCE}')
+    jwt_verifier.verify('{JWT}', nonce='{NONCE}')
     print('Token validated successfully.')
 
 
@@ -111,9 +111,9 @@ import asyncio
 from okta_jwt_verifier import AccessTokenVerifier
 
 
-async def main():
+def main():
     jwt_verifier = AccessTokenVerifier(issuer='{ISSUER}', audience='api://default')
-    await jwt_verifier.verify('{JWT}')
+    jwt_verifier.verify('{JWT}')
     print('Token validated successfully.')
 
 
@@ -121,7 +121,7 @@ loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 ```
 
-It is possible to verify signature if JWK is provided (no async requests):
+It is possible to verify signature if JWK is provided (no requests):
 ```py
 from okta_jwt_verifier import JWTVerifier
 
@@ -134,17 +134,17 @@ def main():
 main()
 ```
 
-The following example shows how to receive JWK using async http request:
+The following example shows how to receive JWK using http request:
 ```py
 import asyncio
 
 from okta_jwt_verifier import JWTVerifier
 
 
-async def main():
+def main():
     jwt_verifier = JWTVerifier('{ISSUER}', '{CLIENT_ID}', 'api://default')
     headers, claims, signing_input, signature = jwt_verifier.parse_token({JWT})
-    okta_jwk = await self.get_jwk(headers['kid'])
+    okta_jwk = self.get_jwk(headers['kid'])
 
     # Then it can be used to verify_signature as in example above.
     jwt_verifier.verify_signature('{JWT}', okta_jwk)
@@ -155,7 +155,7 @@ loop.run_until_complete(main())
 ```
 
 
-It is possible to verify only given list of claims (no async requests):
+It is possible to verify only given list of claims (no requests):
 
 ```py
 from okta_jwt_verifier import JWTVerifier
@@ -171,7 +171,7 @@ def main():
 main()
 ```
 
-or token expiration only (no async requests):
+or token expiration only (no requests):
 
 ```py
 from okta_jwt_verifier import JWTVerifier
@@ -207,9 +207,9 @@ import asyncio
 from okta_jwt_verifier import JWTVerifier
 
 
-async def main():
+def main():
     jwt_verifier = JWTVerifier('{ISSUER}', '{CLIENT_ID}', 'api://default')
-    await jwt_verifier.verify_access_token(access_token)
+    jwt_verifier.verify_access_token(access_token)
 
 
 loop = asyncio.get_event_loop()
@@ -229,9 +229,9 @@ import asyncio
 from okta_jwt_verifier import JWTVerifier
 
 
-async def main():
+def main():
     jwt_verifier = JWTVerifier('malformed_issuer.com', '{CLIENT_ID}', 'api://default')
-    await jwt_verifier.verify_access_token(access_token)
+    jwt_verifier.verify_access_token(access_token)
 
 
 loop = asyncio.get_event_loop()
@@ -251,13 +251,12 @@ import asyncio
 from okta_jwt_verifier import JWTVerifier
 
 
-async def main():
+def main():
     jwt_verifier = JWTVerifier('{ISSUER}', '{CLIENT_ID}', 'api://default')
-    await jwt_verifier.verify_access_token(access_token)
+    jwt_verifier.verify_access_token(access_token)
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
+main()
 ```
 Output (part of traceback removed for simplicity):
 ```sh

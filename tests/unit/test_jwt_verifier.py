@@ -12,7 +12,7 @@ class MockRequestExecutor(RequestExecutor):
 
     response = {}
 
-    async def get(self, uri, **params):
+    def get(self, uri, **params):
         return MockRequestExecutor.response
 
 
@@ -37,8 +37,7 @@ def test_construct_jwks_uri():
     assert actual == expected
 
 
-@pytest.mark.asyncio
-async def test_get_jwk(mocker):
+def test_get_jwk(mocker):
     # mock response
     jwks_resp = {'keys': [{'kty': 'RSA', 'alg': 'RS256', 'kid': 'test_kid',
                            'use': 'sig', 'e': 'AQAB', 'n': 'test_n'},
@@ -53,17 +52,16 @@ async def test_get_jwk(mocker):
 
     expected = {'kty': 'RSA', 'alg': 'RS256', 'kid': 'test_kid',
                 'use': 'sig', 'e': 'AQAB', 'n': 'test_n'}
-    actual = await jwt_verifier.get_jwk('test_kid')
+    actual = jwt_verifier.get_jwk('test_kid')
     assert actual == expected
 
     # check if exception raised in case no matching key
     jwt_verifier._clear_requests_cache = mocker.Mock()
     with pytest.raises(JWKException):
-        actual = await jwt_verifier.get_jwk('test_kid_no_match')
+        actual = jwt_verifier.get_jwk('test_kid_no_match')
 
 
-@pytest.mark.asyncio
-async def test_get_jwks(mocker):
+def test_get_jwks(mocker):
     # mock response
     jwks_resp = {'keys': [{'kty': 'RSA', 'alg': 'RS256', 'kid': 'test_kid',
                            'use': 'sig', 'e': 'AQAB', 'n': 'test_n'}]}
@@ -73,7 +71,7 @@ async def test_get_jwks(mocker):
     jwt_verifier = JWTVerifier('https://test_issuer.com', 'test_client_id',
                                request_executor=request_executor)
 
-    actual = await jwt_verifier.get_jwks()
+    actual = jwt_verifier.get_jwks()
     assert actual == jwks_resp
 
 
@@ -209,26 +207,24 @@ def test_verify_claims_missing_claim():
         jwt_verifier.verify_claims(claims, ('iss', 'aud', 'exp'))
 
 
-@pytest.mark.asyncio
-async def test_access_token_verifier(monkeypatch, mocker):
+def test_access_token_verifier(monkeypatch, mocker):
     """Verify AccessTokenVerifier calls correct method of JWTVerifier with correct parameters."""
     class AsyncMock(mocker.MagicMock):
-        async def __call__(self, *args, **kwargs):
+        def __call__(self, *args, **kwargs):
             return super().__call__(self, *args, **kwargs)
 
     mock_verify_access_token = AsyncMock()
     monkeypatch.setattr(JWTVerifier, 'verify_access_token', mock_verify_access_token)
     issuer = 'https://test_issuer.com'
     jwt_verifier = AccessTokenVerifier(issuer)
-    await jwt_verifier.verify('test_token')
+    jwt_verifier.verify('test_token')
     mock_verify_access_token.assert_called_with(mock_verify_access_token, 'test_token', ('iss', 'aud', 'exp'))
 
 
-@pytest.mark.asyncio
-async def test_id_token_verifier(monkeypatch, mocker):
+def test_id_token_verifier(monkeypatch, mocker):
     """Verify IDTokenVerifier calls correct method of JWTVerifier with correct parameters."""
     class AsyncMock(mocker.MagicMock):
-        async def __call__(self, *args, **kwargs):
+        def __call__(self, *args, **kwargs):
             return super().__call__(self, *args, **kwargs)
 
     mock_verify_id_token = AsyncMock()
@@ -236,5 +232,5 @@ async def test_id_token_verifier(monkeypatch, mocker):
     issuer = 'https://test_issuer.com'
     client_id = 'test_client_id'
     jwt_verifier = IDTokenVerifier(issuer, client_id)
-    await jwt_verifier.verify('test_token')
+    jwt_verifier.verify('test_token')
     mock_verify_id_token.assert_called_with(mock_verify_id_token, 'test_token', ('iss', 'exp'), None)
